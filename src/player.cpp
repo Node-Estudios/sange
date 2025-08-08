@@ -170,7 +170,7 @@ int Player::configure_filters(){
 		return AVERROR(ENOMEM);
 	filter_graph -> nb_threads = 1;
 
-	AVChannelLayout channel_layouts[] = {audio_out.ch_layout};
+	AVChannelLayout channel_layouts[] = {audio_out.ch_layout, {}};
 	int sample_rates[] = {audio_out.sample_rate, -1};
 	int channels[] = {audio_out.channels, -1};
 	int sample_fmts[] = {audio_out.fmt, -1};
@@ -178,7 +178,7 @@ int Player::configure_filters(){
 	char filter_args[256];
 
 	snprintf(filter_args, sizeof(filter_args), "sample_rate=%d:sample_fmt=%d:channels=%d:channel_layout=0x%" PRIx64,
-												audio_in.sample_rate, audio_in.fmt, audio_in.channels, audio_in.ch_layout);
+												audio_in.sample_rate, audio_in.fmt, audio_in.channels, audio_in.ch_layout.u.mask);
 	int ret;
 
 	if((ret = avfilter_graph_create_filter(&filter_src, avfilter_get_by_name("abuffer"), nullptr, filter_args, nullptr, filter_graph)) < 0)
