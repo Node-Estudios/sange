@@ -3,15 +3,30 @@ cmake_minimum_required(VERSION 3.10)
 project(sange CXX)
 set(CMAKE_CXX_STANDARD 17)
 
-if (DEFINED NODE_ADDON_INC)
-    include_directories(${NODE_ADDON_INC})
-endif()
+# Get Node-API includes from node-addon-api
+execute_process(
+    COMMAND node -p "require('node-addon-api').include"
+    OUTPUT_VARIABLE NODE_ADDON_API_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
 
-include_directories(${CMAKE_JS_INC})
-include_directories(${NODE_ADDON_INC})
+# Remove any surrounding quotes from the path
+string(REGEX REPLACE "^\"|\"$" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 
+# Include directories
+include_directories(
+    ${CMAKE_JS_INC}
+    ${NODE_ADDON_API_DIR}
+)
+
+# Print include paths for debugging
+message(STATUS "CMAKE_JS_INC: ${CMAKE_JS_INC}")
+message(STATUS "NODE_ADDON_API_DIR: ${NODE_ADDON_API_DIR}")
+
+# Set debug flags
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSANGE_DEBUG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSANGE_DEBUG -g")
 endif()
 
 add_library(sange SHARED
